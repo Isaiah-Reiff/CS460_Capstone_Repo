@@ -1,0 +1,6 @@
+// Simulating user input
+
+// Sanitize and escape user input to prevent XSS
+
+// Properly handling user input by escaping it before outputting to a webpage
+

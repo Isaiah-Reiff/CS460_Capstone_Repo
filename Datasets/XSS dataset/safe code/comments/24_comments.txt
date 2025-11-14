@@ -1,0 +1,2 @@
+// The user input is properly sanitized and escaped before output
+

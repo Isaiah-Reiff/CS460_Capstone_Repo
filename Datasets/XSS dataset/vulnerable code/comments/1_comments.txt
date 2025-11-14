@@ -1,0 +1,2 @@
+// User input is directly output without proper validation or encoding
+

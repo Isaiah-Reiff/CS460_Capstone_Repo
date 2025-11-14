@@ -1,0 +1,4 @@
+// Simulating user input
+
+// Improperly handling user input by directly outputting it to a webpage
+

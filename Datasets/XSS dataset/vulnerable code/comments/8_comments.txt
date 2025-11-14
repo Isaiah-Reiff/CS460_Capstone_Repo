@@ -1,0 +1,2 @@
+// User input is directly inserted into the HTML response
+

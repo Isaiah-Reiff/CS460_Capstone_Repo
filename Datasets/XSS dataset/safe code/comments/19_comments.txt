@@ -1,0 +1,2 @@
+// Replace characters that have special meaning in HTML with their HTML entity equivalents
+

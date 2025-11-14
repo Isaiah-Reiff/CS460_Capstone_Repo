@@ -1,0 +1,2 @@
+// Properly handling user input by encoding it before printing to the HTML response
+

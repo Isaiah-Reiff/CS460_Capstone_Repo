@@ -1,0 +1,4 @@
+// Improperly handling user input without sanitization
+
+// Vulnerable to XSS
+
