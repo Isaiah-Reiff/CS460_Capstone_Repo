@@ -1,0 +1,14 @@
+from flask import Flask,request
+from werkzeug.utils import secure_filename
+import os,uuid
+ALLOWED={'png','jpg','jpeg'}
+app=Flask(__name__)
+@app.route('/upload',methods=['POST'])
+def upload():
+    f=request.files['file']
+    ext=f.filename.rsplit('.',1)[-1].lower()
+    if ext in ALLOWED:
+        name=str(uuid.uuid4())+'.'+ext
+        f.save(os.path.join('uploads',secure_filename(name)))
+        return 'ok'
+    return 'bad'
