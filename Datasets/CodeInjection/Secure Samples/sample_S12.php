@@ -1,7 +1,6 @@
 <?php
 $template = $_GET['tpl'] ?? "";
 
-// Escape template output instead of evaluating it
 function render_template($template, $context = []) {
     return preg_replace_callback('/\{\{(.+?)\}\}/', function($matches) use ($context) {
         $key = trim($matches[1]);
@@ -9,7 +8,6 @@ function render_template($template, $context = []) {
     }, $template);
 }
 
-// Example context
 $context = [
     'user' => 'Alice',
     'role' => 'admin'

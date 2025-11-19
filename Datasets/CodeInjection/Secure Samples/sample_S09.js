@@ -7,8 +7,6 @@ const handlers = {
 function handleUserRequest(body) {
     let req;
 
-    // Expect input as JSON, e.g.:
-    // {"action":"sum","items":[1,2,3]}
     try {
         req = JSON.parse(body);
     } catch (e) {
@@ -22,7 +20,6 @@ function handleUserRequest(body) {
     return handlers[req.action](req.items);
 }
 
-// Example usage:
-const userBody = req.body.jsonPayload; // User input as data, not code
+const userBody = req.body.jsonPayload; 
 const result = handleUserRequest(userBody);
 console.log(result);

@@ -4,7 +4,6 @@ const handlers = {
     upper: (str) => str.toUpperCase()
 };
 
-// Input expected as: {"action":"reverse","value":"hello"}
 function processUserRequest(jsonInput) {
     let req;
     try {
@@ -20,6 +19,5 @@ function processUserRequest(jsonInput) {
     return handlers[req.action](req.value);
 }
 
-// Example usage:
-const userInput = getUserInput(); // safe, raw text but not treated as code
+const userInput = getUserInput(); 
 console.log(processUserRequest(userInput));

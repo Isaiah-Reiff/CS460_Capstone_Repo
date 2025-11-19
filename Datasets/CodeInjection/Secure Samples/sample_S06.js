@@ -6,7 +6,6 @@ const actions = {
 const input = document.getElementById('code').value;
 
 try {
-    // Expecting a simple JSON object like: {"action":"add","a":2,"b":3}
     const obj = JSON.parse(input);
 
     if (obj.action in actions) {

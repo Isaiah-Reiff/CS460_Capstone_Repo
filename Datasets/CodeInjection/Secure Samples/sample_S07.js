@@ -5,7 +5,6 @@ const operations = {
 };
 
 const input = document.querySelector('#fn').value;
-// expecting something like: {"op":"square","value":5}
 
 let obj;
 try {
