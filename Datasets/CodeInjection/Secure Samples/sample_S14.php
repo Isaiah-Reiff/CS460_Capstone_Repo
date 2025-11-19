@@ -1,14 +1,12 @@
 <?php
 $expr = $_POST['calc'] ?? "";
 
-// Allow only digits, +, -, *, /, and whitespace
 if (!preg_match('/^[\d+\-*/\s]+$/', $expr)) {
     http_response_code(400);
     echo "Invalid expression";
     exit;
 }
 
-// Evaluate safely using a custom parser
 $tokens = explode(' ', $expr);
 if (count($tokens) === 3) {
     [$a, $op, $b] = $tokens;

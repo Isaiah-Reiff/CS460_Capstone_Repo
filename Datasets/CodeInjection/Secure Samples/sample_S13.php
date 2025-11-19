@@ -4,7 +4,6 @@ use Twig\Loader\ArrayLoader;
 use Twig\Extension\SandboxExtension;
 use Twig\Sandbox\SecurityPolicy;
 
-// Strict policy: allow only variable interpolation
 $policy = new SecurityPolicy(
     /* allowed tags    */ ['if'],
     /* allowed filters */ [],
@@ -15,11 +14,9 @@ $policy = new SecurityPolicy(
 
 $loader = new ArrayLoader([]);
 
-// Enable sandbox mode
 $twig = new Environment($loader);
 $twig->addExtension(new SandboxExtension($policy, true));
 
-// Only allow a fixed set of trusted templates
 $allowedTemplates = [
     'profile' => 'Hello {{ user }}!'
 ];

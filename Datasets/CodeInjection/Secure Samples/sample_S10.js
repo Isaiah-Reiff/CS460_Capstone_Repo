@@ -4,9 +4,6 @@ const actions = {
     isEven: (n) => (n % 2 === 0)
 };
 
-// Expecting JSON like:
-// { "action": "greet", "args": ["joe"] }
-
 function handleRequest(body) {
     let req;
 
@@ -24,6 +21,5 @@ function handleRequest(body) {
     return handler(...(req.args || []));
 }
 
-// Usage:
 const result = handleRequest(req.body.action);
 console.log(result);
