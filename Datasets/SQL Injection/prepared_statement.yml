@@ -1,0 +1,132 @@
+<?php
+// safe_login.php — Prepared Statement
+
+$username = $_POST['username'];
+$password = $_POST['password'];
+
+// Defining the structure of the query
+// but does not yet include any actual user data.
+$stmt = $mysqli->prepare("SELECT * FROM users WHERE username = ? AND password = ?");
+
+// Binding the actual user inputs to the placeholders above.
+// The "ss" tells MySQL that both parameters are strings.
+$stmt->bind_param("ss", $username, $password);
+
+// Execute statement cecause the SQL and data are kept separate,
+// malicious input cannot change the query structure
+$stmt->execute();
+
+// Retrieve and evaluate the result
+$result = $stmt->get_result();
+if ($result && $result->num_rows > 0) {
+    echo "Logged in successfully";
+} else {
+    echo "Invalid credentials";
+}
+
+// Close the statement to free system resources
+$stmt->close();
+?>
+
+
+
+
+
+// safe_auth.java — Prepared Statement
+
+String username = request.getParameter("username");
+String password = request.getParameter("password");
+
+// Create a SQL statement that contains placeholders for parameters.
+String sql = "SELECT * FROM users WHERE username = ? AND password = ?";
+
+// Creating the PreparedStatement object using the connection.
+try (PreparedStatement ps = conn.prepareStatement(sql)) {
+
+    // Bind user-provided values to the placeholders
+    ps.setString(1, username);
+    ps.setString(2, password);
+
+    // Execution of the query below
+    try (ResultSet rs = ps.executeQuery()) {
+        if (rs.next()) {
+            System.out.println("Authenticated successfully");
+        } else {
+            System.out.println("Invalid credentials");
+        }
+    }
+}
+
+
+
+
+# safe_search.py — Prepared Statement Example
+# --------------------------------------------
+# This script safely queries a database using parameter substitution.
+
+import sqlite3
+conn = sqlite3.connect('test.db')
+cur = conn.cursor()
+
+# The user types a search term, for example "book" or "' OR '1'='1".
+term = input("Search term: ")
+
+# Step 1. Write the SQL with a placeholder.
+# Step 2. Supply the user input as a separate tuple argument.
+cur.execute("SELECT * FROM products WHERE name = ?", (term,))
+
+# Step 3. Display the results.
+print(cur.fetchall())
+
+conn.close()
+
+
+
+
+
+
+// safe.js — Prepared Statement Example
+// -------------------------------------
+// This script demonstrates how Node.js performs safe queries
+// using parameterized queries in the mysql or mysql2 library.
+
+const username = req.body.username;
+const password = req.body.password;
+
+// Step 1. Write the query template using question mark placeholders.
+const sql = "SELECT * FROM users WHERE username = ? AND password = ?";
+
+// Step 2. Supply user input separately in an array.
+// The driver automatically escapes and binds these values.
+db.query(sql, [username, password], (err, rows) => {
+  if (err) throw err;
+
+  // Step 3. Handle the result based on whether rows are returned.
+  if (rows.length > 0) {
+    console.log("Logged in successfully");
+  } else {
+    console.log("Invalid credentials");
+  }
+});
+
+
+
+
+
+-- safe_prepared.sql — Prepared Statement Example
+-- ------------------------------------------------
+-- Many database systems allow prepared statements to be created
+-- directly inside SQL. The process separates query structure from data.
+
+-- Step 1. Define the query with placeholders.
+PREPARE stmt FROM 'SELECT * FROM users WHERE username = ? AND password = ?';
+
+-- Step 2. Assign actual values to variables.
+SET @user = 'admin';
+SET @pass = 'pw123';
+
+-- Step 3. Execute the prepared statement with the bound variables.
+EXECUTE stmt USING @user, @pass;
+
+-- Step 4. Free the prepared statement when done.
+DEALLOCATE PREPARE stmt;
