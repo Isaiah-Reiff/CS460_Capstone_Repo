@@ -6,7 +6,6 @@ public class Executor
 {
     public void Run(string userExpression)
     {
-        // Vulnerable: user-provided C# expression is compiled into a delegate
         var lambda = System.Linq.Dynamic.Core.DynamicExpressionParser.ParseLambda(
             null, 
             typeof(int), 
