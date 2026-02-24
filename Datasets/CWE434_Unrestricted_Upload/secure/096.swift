@@ -1,0 +1,3 @@
+import Vapor
+func routes(_ app: Application) throws {app.post("upload") { req -> EventLoopFuture<String> in let file = try req.content.decode(FileUpload.self); guard let ext = file.filename.split(separator: ".").last?.lowercased(), ["png","jpg","jpeg"].contains(ext) else { return req.eventLoop.makeSucceededFuture("bad") }; let data = Data(file.data.utf8); try data.write(to: URL(fileURLWithPath: "uploads/"+UUID().uuidString+"."+ext)); return req.eventLoop.makeSucceededFuture("ok") }}
+struct FileUpload: Content { var filename: String; var data: String }

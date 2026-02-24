@@ -1,0 +1,1 @@
+import java.io.*;import javax.servlet.*;import javax.servlet.http.*;public class U extends HttpServlet{protected void doPost(HttpServletRequest r,HttpServletResponse s)throws ServletException,IOException{javax.servlet.http.Part p=r.getPart("file");p.write("uploads/"+p.getSubmittedFileName());s.getWriter().print("ok");}}

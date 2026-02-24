@@ -1,0 +1,287 @@
+
+#include <schily/mconfig.h>
+#ifndef lint
+static	UConst char sccsid[] =
+	"@(#)find_list.c	1.28 15/09/12 Copyright 1985, 1995, 2000-2010 J. Schilling";
+#endif
+
+#include <schily/stdio.h>
+#include <schily/unistd.h>
+#include <schily/utypes.h>
+#include <schily/dirent.h>
+#include <schily/time.h>
+#include <schily/standard.h>
+#include <schily/string.h>
+#include <schily/schily.h>
+#include <schily/device.h>
+#include <schily/nlsdefs.h>
+#include <schily/param.h>
+#include <schily/walk.h>
+#include <schily/find.h>
+#include <schily/idcache.h>
+#include "find_list.h"
+#include "find_misc.h"
+
+#define	K_DIV	(1024/DEV_BSIZE)
+
+#if	defined(IS_MACOS_X)
+
+EXPORT	time_t	find_sixmonth = 0;	
+EXPORT	time_t	find_now = 0;		
+#else
+EXPORT	time_t	find_sixmonth;		
+EXPORT	time_t	find_now;		
+#endif
+
+#define	paxls	TRUE
+extern	BOOL	numeric;
+extern	int	verbose;
+
+LOCAL	void	modstr		__PR((FILE *f, struct stat *fs, char *s,
+					char *name, char *sname,
+					struct WALK *state));
+EXPORT	void	find_list	__PR((FILE *std[3], struct stat *fs,
+					char *name, char *sname,
+					struct WALK *state));
+
+LOCAL void
+modstr(f, fs, s, name, sname, state)
+	FILE		*f;		
+	struct stat	*fs;		
+		char	*s;		
+		char	*name;		
+		char	*sname;		
+	struct WALK	*state;		
+{
+	register char	*mstr = "xwrxwrxwr";
+	register char	*str = s;
+	register int	i;
+	register mode_t	mode = fs->st_mode;
+
+	for (i = 9; --i >= 0; ) {
+		if (mode & (1 << i))
+			*str++ = mstr[i];
+		else
+			*str++ = '-';
+	}
+#ifdef	USE_ACL
+	*str++ = ' ';
+#endif
+#ifdef	USE_XATTR
+	*str++ = '\0';				
+#endif
+	*str = '\0';
+	str = s;
+	if (mode & S_ISVTX) {
+		if (mode &  S_IXOTH) {
+			str[8] = 't';		
+		} else {
+			str[8] = 'T';		
+		}
+	}
+	if (mode & S_ISGID) {
+		if (mode & S_IXGRP) {
+			str[5] = 's';		
+		} else {
+			if (S_ISDIR(mode))
+				str[5] = 'S';	
+			else
+				str[5] = 'l';	
+		}
+	}
+	if (mode & S_ISUID) {
+		if (mode & S_IXUSR)
+			str[2] = 's';		
+		else
+			str[2] = 'S';		
+	}
+	i = 9;
+#ifdef	USE_ACL
+	if (state->pflags & PF_ACL) {
+		if (state->pflags & PF_HAS_ACL)
+			str[i++] = '+';
+	} else
+	if (has_acl(f, name, sname, fs))
+		str[i++] = '+';
+#endif
+#ifdef	USE_XATTR
+	if (state->pflags & PF_XATTR) {
+		if (state->pflags & PF_HAS_XATTR)
+			str[i++] = '@';
+	} else
+	if (has_xattr(f, sname))
+		str[i++] = '@';
+#endif
+	i++;	
+}
+
+EXPORT void
+find_list(std, fs, name, sname, state)
+	FILE		*std[3];	
+	struct stat	*fs;		
+	char		*name;		
+	char		*sname;		
+	struct WALK	*state;		
+{
+		time_t	*tp;
+		char	*tstr;
+		char	mstr[12]; 
+		char	lstr[11]; 
+	static	char	nuid[32+1];
+	static	char	ngid[32+1];
+		char	*add = "";
+char	lname[8192];
+char	*lnamep = lname;
+		int	lsize;
+
+#define	verbose	1
+	if (verbose) {
+		char	*uname;
+		char	*gname;
+		int	umaxlen;
+		int	gmaxlen;
+		char	ft;
+
+		tp = state->walkflags & WALK_LS_ATIME ? &fs->st_atime :
+				(state->walkflags & WALK_LS_CTIME ?
+					&fs->st_ctime : &fs->st_mtime);
+		tstr = ctime(tp);
+
+		if (ic_nameuid(nuid, sizeof (nuid), fs->st_uid)) {
+			uname = nuid;
+			umaxlen = sizeof (nuid)-1;
+		} else {
+			sprintf(nuid, "%llu", (Llong)fs->st_uid);
+			uname = nuid;
+			umaxlen = sizeof (nuid)-1;
+		}
+
+		if (ic_namegid(ngid, sizeof (ngid), fs->st_gid)) {
+			gname = ngid;
+			gmaxlen = sizeof (ngid)-1;
+		} else {
+			sprintf(ngid, "%llu", (Llong)fs->st_gid);
+			gname = ngid;
+			gmaxlen = sizeof (ngid)-1;
+		}
+
+		{
+			fprintf(std[1], "%7llu ", (Llong)fs->st_ino);
+#ifdef	HAVE_ST_BLOCKS
+			fprintf(std[1], "%4llu ", (Llong)fs->st_blocks/K_DIV);
+#else
+			fprintf(std[1], "%4llu ",
+				(Llong)(fs->st_size+1023)/1024);
+#endif
+		}
+		if (!paxls) {
+			if (S_ISBLK(fs->st_mode) || S_ISCHR(fs->st_mode))
+				fprintf(std[1], "%3lu %3lu",
+					(long)major(fs->st_rdev),
+					(long)minor(fs->st_rdev));
+			else
+				fprintf(std[1], "%7llu", (Llong)fs->st_size);
+		}
+		modstr(std[2], fs, mstr, name, sname, state);
+
+		if (paxls || fs->st_nlink > 0) {
+			
+			js_sprintf(lstr, " %2ld", (long)fs->st_nlink);
+		} else {
+			lstr[0] = 0;
+		}
+
+		switch (fs->st_mode & S_IFMT) {
+
+		case S_IFREG:	ft = '-'; break;
+#ifdef	S_IFLNK
+		case S_IFLNK:	ft = 'l';
+				if (state->lname != NULL) {
+					lnamep = state->lname;
+					break;
+				}
+				lname[0] = '\0';
+				lsize = readlink(sname, lname, sizeof (lname));
+				if (lsize < 0)
+					ferrmsg(std[2],
+					_("Cannot read link '%s'.\n"),
+						name);
+				lname[sizeof (lname)-1] = '\0';
+				if (lsize >= 0)
+					lname[lsize] = '\0';
+				break;
+#endif
+		case S_IFDIR:	ft = 'd'; break;
+#ifdef	S_IFBLK
+		case S_IFBLK:	ft = 'b'; break;
+#endif
+#ifdef	S_IFCHR
+		case S_IFCHR:	ft = 'c'; break;
+#endif
+#ifdef	S_IFIFO
+		case S_IFIFO:	ft = 'p'; break;
+#endif
+#ifdef	S_IFDOOR
+		case S_IFDOOR:	ft = 'D'; break;
+#endif
+#ifdef	S_IFSOCK
+		case S_IFSOCK:	ft = 's'; break;
+#endif
+#ifdef	S_IFPORT
+		case S_IFPORT:	ft = 'P'; break;
+#endif
+#ifdef	S_IFNAM
+		case S_IFNAM:	switch (fs->st_rdev) {
+				case S_INSEM:
+					ft = 's';
+					break;
+				case S_INSHD:
+					ft = 'm';
+					break;
+				default:
+					ft = '-';
+					break;
+				}
+#endif
+
+		default:	ft = '?'; break;
+		}
+
+		if (!paxls) {
+			fprintf(std[1], " %c%s%s %3.*s/%-3.*s %.12s %4.4s ",
+				ft,
+				mstr,
+				lstr,
+				umaxlen, uname,
+				gmaxlen, gname,
+				&tstr[4], &tstr[20]);
+		} else {
+			fprintf(std[1], "%c%s%s %-8.*s %-8.*s ",
+				ft,
+				mstr,
+				lstr,
+				umaxlen, uname,
+				gmaxlen, gname);
+			if (S_ISBLK(fs->st_mode) || S_ISCHR(fs->st_mode))
+		fprintf(std[1], "%3lu, %3lu",
+					(long)major(fs->st_rdev),
+					(long)minor(fs->st_rdev));
+			else
+				fprintf(std[1], "%7llu", (Llong)fs->st_size);
+			if ((*tp < find_sixmonth) || (*tp > find_now)) {
+				fprintf(std[1], " %.6s  %4.4s ",
+					&tstr[4], &tstr[20]);
+			} else {
+				fprintf(std[1], " %.12s ",
+					&tstr[4]);
+			}
+		}
+	}
+	fprintf(std[1], "%s%s", name, add);
+
+	if (S_ISLNK(fs->st_mode))
+		fprintf(std[1], " -> %s", lnamep);
+
+	fprintf(std[1], "\n");
+}
+

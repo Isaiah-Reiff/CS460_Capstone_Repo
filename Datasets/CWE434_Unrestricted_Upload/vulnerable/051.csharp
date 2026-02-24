@@ -1,0 +1,1 @@
+using Microsoft.AspNetCore.Mvc;public class C:Controller{[HttpPost("/upload")]public IActionResult U(){var f=Request.Form.Files[0];using(var fs=System.IO.File.Create("uploads/"+f.FileName)){f.CopyTo(fs);}return Ok();}}

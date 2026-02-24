@@ -1,0 +1,6 @@
+import io.ktor.application.*
+import io.ktor.http.content.*
+import io.ktor.response.*
+import io.ktor.routing.*
+import java.util.*
+fun Application.module(){routing{post("/upload"){val mp=call.receiveMultipart();mp.forEachPart{if(it is PartData.FileItem){val name=it.originalFileName!!;val ext=name.substringAfterLast('.').lowercase();if(ext in listOf("png","jpg","jpeg")){val bytes=it.streamProvider().readBytes();java.io.File("uploads/"+UUID.randomUUID().toString()+"."+ext).writeBytes(bytes);call.respondText("ok")}};it.dispose()}}}

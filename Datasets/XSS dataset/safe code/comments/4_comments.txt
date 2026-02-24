@@ -1,0 +1,6 @@
+// Sanitize user input to prevent XSS
+
+// Safe from XSS
+
+// Escape special characters
+

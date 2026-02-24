@@ -1,0 +1,4 @@
+// Improperly handling user input by directly printing it to the response
+
+// Vulnerable to XSS
+
