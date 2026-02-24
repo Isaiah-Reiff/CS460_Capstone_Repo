@@ -1,4 +1,3 @@
-// VULN: compiling user-supplied Java source via ToolProvider compiler API
 import javax.tools.*;
 import java.util.*;
 public class V050 {
@@ -9,7 +8,7 @@ public class V050 {
     JavaFileObject f = new SimpleJavaFileObject(java.net.URI.create("string:///U.java"), JavaFileObject.Kind.SOURCE) {
       public CharSequence getCharContent(boolean ignore) { return src; }
     };
-    c.getTask(null, null, null, null, null, Arrays.asList(f)).call(); // CWE-94
+    c.getTask(null, null, null, null, null, Arrays.asList(f)).call(); 
     System.out.println("compiled");
   }
 }

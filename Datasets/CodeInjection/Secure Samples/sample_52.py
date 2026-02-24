@@ -1,4 +1,4 @@
 import json
 s = input("JSON: ")
-obj = json.loads(s)  # data only
+obj = json.loads(s) 
 print(obj)
