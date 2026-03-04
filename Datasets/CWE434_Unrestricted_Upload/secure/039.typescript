@@ -1,0 +1,1 @@
+import express from 'express';import multer from 'multer';import path from 'path';import {v4 as uuidv4} from 'uuid';const storage=multer.diskStorage({destination:'uploads',filename:(req,file,cb)=>cb(null,uuidv4()+path.extname(file.originalname))});const upload=multer({storage});const app=express();app.post('/upload',upload.single('file'),(req,res)=>res.send('ok'));

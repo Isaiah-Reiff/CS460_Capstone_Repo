@@ -1,0 +1,1 @@
+const express=require('express');const multer=require('multer');const path=require('path');const {v4}=require('uuid');const storage=multer.diskStorage({destination:'uploads',filename:(r,f,cb)=>cb(null,v4()+path.extname(f.originalname))});const upload=multer({storage});const app=express();app.post('/upload',upload.single('file'),(req,res)=>{res.send('ok');});

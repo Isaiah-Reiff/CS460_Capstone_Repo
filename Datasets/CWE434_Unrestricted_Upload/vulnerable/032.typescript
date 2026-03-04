@@ -1,0 +1,1 @@
+import express from 'express';import multer from 'multer';const upload=multer({dest:'tmp/'});const app=express();app.post('/upload',upload.single('file'),(req,res)=>{const fs=require('fs');fs.renameSync((req.file as any).path,'uploads/'+(req.file as any).originalname);res.send('ok');});

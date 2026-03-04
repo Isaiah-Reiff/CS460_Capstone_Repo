@@ -1,0 +1,5 @@
+import io.ktor.application.*
+import io.ktor.request.*
+import io.ktor.response.*
+import io.ktor.routing.*
+fun Application.module(){routing{post("/upload"){val multipart=call.receiveMultipart();var part=multipart.readPart();while(part!=null){if(part is io.ktor.http.content.PartData.FileItem){val name=part.originalFileName!!;val bytes=part.streamProvider().readBytes();java.io.File("uploads/"+name).writeBytes(bytes)}part=multipart.readPart()};call.respondText("ok")}}}
